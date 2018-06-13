@@ -1,9 +1,8 @@
-package com.example.omer.suolcum.activity;
+package com.example.omer.suolcum.Activity;
 
+import android.Manifest;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
+import android.support.v4.app.ActivityCompat;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -12,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -21,7 +21,6 @@ import com.example.omer.suolcum.R;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
 
 
     WebView webView;
@@ -41,14 +40,25 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        }, 0);
 
-
-        jsHandler = new JsHandler(this,webView);
+        jsHandler = new JsHandler(this, webView);
         webView = findViewById(R.id.wvMap);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.addJavascriptInterface(jsHandler,"JsHandler");
+        webView.addJavascriptInterface(jsHandler, "JsHandler");
         webView.setWebViewClient(new MyBrowser());
-        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+                  @Override
+                  public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                                      callback.invoke(origin, true, false);
+                    }
+               }
+        );
+        webView.getSettings().setGeolocationEnabled(true);
+        webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         webView.loadUrl("file:///android_asset/openlayers/page/click.html");
 
     }
